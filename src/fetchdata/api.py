@@ -2,6 +2,27 @@ import yfinance as yf
 import pandas as pd
 import time
 import os
+from sqlconnect import get_sql_connection
+
+conn = get_sql_connection()
+cursor = conn.cursor()
+
+cursor.execute("""
+IF OBJECT_ID('dbo.StockLiveData', 'U') IS NULL
+CREATE TABLE dbo.StockLiveData (
+    [Symbol] VARCHAR(10),
+    [Name] NVARCHAR(255),
+    [Price] FLOAT,
+    [MarketCap] BIGINT,
+    [PERatio] FLOAT,
+    [High52W] FLOAT,
+    [Low52W] FLOAT,
+    [Volume] BIGINT,
+    [Sector] NVARCHAR(100),
+    [FetchTime] DATETIME DEFAULT GETDATE()
+)
+""")
+conn.commit()
 
 # List of top 20 stock symbols (example: S&P 500 top 20 by market cap)
 top_20_symbols = [
@@ -18,14 +39,24 @@ def fetch_and_display():
             "Symbol": symbol,
             "Name": info.get("longName", ""),
             "Price": info.get("regularMarketPrice", ""),
-            "Market Cap": info.get("marketCap", ""),
-            "PE Ratio": info.get("trailingPE", ""),
-            "52w High": info.get("fiftyTwoWeekHigh", ""),
-            "52w Low": info.get("fiftyTwoWeekLow", ""),
+            "Market_Cap": info.get("marketCap", ""),
+            "PERatio": info.get("trailingPE", ""),
+            "High52W": info.get("fiftyTwoWeekHigh", ""),
+            "Low52W": info.get("fiftyTwoWeekLow", ""),
             "Volume": info.get("volume", ""),
             "Sector": info.get("sector", ""),
         }
         data.append(row)
+        cursor.execute("""
+                    INSERT INTO dbo.StockLiveData 
+                    (Symbol, Name, Price, MarketCap, PERatio, High52W, Low52W, Volume, Sector)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """, row["Symbol"], row["Name"], row["Price"], row["Market_Cap"],
+                    row["PERatio"], row["High52W"], row["Low52W"], row["Volume"], row["Sector"])
+
+        conn.commit()
+
+
     df = pd.DataFrame(data)
     os.system('cls' if os.name == 'nt' else 'clear')
     print(df.to_string(index=False))
@@ -34,6 +65,6 @@ if __name__ == "__main__":
     while True:
         fetch_and_display()
         print("\nUpdating in 60 seconds...")
-        time.sleep(60)
+        time.sleep(3600)
 
         
