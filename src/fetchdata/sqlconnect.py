@@ -8,8 +8,8 @@ def get_sql_connection():
             "SERVER=DREAM;"  
             "DATABASE=stockdata;"   
             "Trusted_Connection=yes;"
-           
         )
+
         print("Connected to SQL Server successfully.")
         return conn
     except pyodbc.Error as e:
