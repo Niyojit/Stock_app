@@ -1,1 +1,8 @@
-venwe/
+stockenv/
+.vscode/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+Stock_app/
