@@ -2,7 +2,7 @@ import pyodbc
 
 conn = pyodbc.connect(
     'DRIVER={SQL Server};'
-    'SERVER=DESKTOP-8AVP1A3;'
+    'SERVER=LAPTOP-HSG1FD5R;'
     'DATABASE=stockdata;'
     'UID=sa;'
     'PWD=training@123'
