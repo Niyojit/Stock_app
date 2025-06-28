@@ -1,7 +1,7 @@
 import streamlit as st
 
 
-def show_examples():
+def show_contact_us():
     st.header("Examples")
     col_1, col_2 = st.columns(2, gap="medium")
     col_1.write(

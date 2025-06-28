@@ -5,7 +5,7 @@ def get_sql_connection():
     try:
         conn = pyodbc.connect(
             "DRIVER={SQL Server};"
-            "SERVER=DREAM;"  
+            "SERVER=DESKTOP-8AVP1A3;"  
             "DATABASE=stockdata;"   
             "Trusted_Connection=yes;"
         )

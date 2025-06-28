@@ -1,7 +1,7 @@
 import streamlit as st
 
 
-def show_user_guide():
+def show_sip_calculator():
     st.header("User guide")
     st.write(
         """

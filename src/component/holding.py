@@ -1,7 +1,7 @@
 import streamlit as st
 
 
-def show_install():
+def show_holding():
     st.header("Install")
     st.write(
         """

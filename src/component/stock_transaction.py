@@ -1,7 +1,7 @@
 import streamlit as st
 
 
-def show_api():
+def show_stock_transaction():
     st.header("API")
     st.write(
         """
