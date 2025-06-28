@@ -3,9 +3,12 @@ import pandas as pd
 import time
 import os
 from sqlconnect import get_sql_connection
-
+from datetime import timedelta , datetime
 conn = get_sql_connection()
 cursor = conn.cursor()
+
+
+last_cleanup_time = datetime.now()
 
 cursor.execute("""
 IF OBJECT_ID('dbo.StockLiveData', 'U') IS NULL
@@ -56,13 +59,26 @@ def fetch_and_display():
 
         conn.commit()
 
-
     df = pd.DataFrame(data)
     os.system('cls' if os.name == 'nt' else 'clear')
     print(df.to_string(index=False))
 
+def clean_data():
+    print("deleting old stock data from SQL")
+    cursor.execute("Truncate table dbo.StockLiveData ")
+    conn.commit()
+
+
+
 if __name__ == "__main__":
     while True:
+        currtime = datetime.now()
+
+        if (currtime - last_cleanup_time) >= timedelta(seconds=60):
+            clean_data()
+            last_cleanup_time = currtime
+
+
         fetch_and_display()
         print("\nUpdating in 60 seconds...")
         time.sleep(3600)
