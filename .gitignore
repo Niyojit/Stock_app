@@ -1,4 +1,5 @@
 stockenv/
 .vscode/
+fetchdata/
 __pycache__/
 Stock_app/
