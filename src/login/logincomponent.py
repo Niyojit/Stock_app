@@ -3,7 +3,7 @@ import os
 import bcrypt
 import streamlit as st
 import datetime
-#streamlit run "d:\Bootcamp june 2025\stocks_app\Stock_app\src\login\logincomponent.py"
+#streamlit run "d:\Bootcamp june 2025\stocks_app\src\login\logincomponent.py"
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
 from src.fetchdata.sqlconnect import get_sql_connection
 
