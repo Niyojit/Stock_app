@@ -1,30 +1,58 @@
 import streamlit as st
-# def relianceIndustries():
+import pandas as pd
+import os
+import sys
 
-col1, col2 = st.columns([10,5])
-with col1:
-        st.markdown("<h4>Wallet Balance</h4>", unsafe_allow_html=True)
-        st.write("""
-            Reliance Industries Limited (RIL) is a conglomerate with interests in petrochemicals, refining, oil, telecommunications, and retail.
-            It is one of India's largest companies by market capitalization and has a significant presence in various sectors.
-        """)
-with col2:
-        st.markdown("<h4>Reliance Industries</h4>", unsafe_allow_html=True)
-        
-        with st.expander("Transactions", expanded = True):
-                tab1, tab2 = st.tabs(["Buy", "Sell"]) 
-                with tab1:
-                    col3, col4 = st.columns([1,1])
-                    with col3:
-                        st.write("Current Price:")
-                        st.info("10")
-                    with col4:
-                        st.text_input("Quantity", placeholder="Enter amount", key="add_quantity")
-                    st.button("Add Money", use_container_width=True)
-                with tab2:
-                    col3, col4 = st.columns([1,1])
-                    with col3:
-                        st.write("Current Price:")
-                    with col4:
-                        st.text_input("Add money", label_visibility="collapsed", placeholder="Enter amount", key="withdraw_money")
-                    st.button("Withdraw Money", use_container_width=True)
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from fetchdata.sqlconnect import get_sql_connection
+
+def show_stock_details():
+    query_params = st.query_params
+    symbol = query_params.get("symbol")
+
+    if not symbol:
+        st.error("No stock selected.")
+        return
+
+    conn = get_sql_connection()
+    df = pd.read_sql(f"SELECT * FROM dbo.IndianStockLiveData WHERE Symbol = '{symbol}'", conn)
+    conn.close()
+
+    if df.empty:
+        st.warning("Stock not found.")
+        return
+
+    stock = df.iloc[0]
+    st.title(f"{stock['Name']} ({stock['Symbol']})")
+    st.write(f"**Price:** ₹{stock['Price']}")
+    st.write(f"**P/E Ratio:** {stock['PERatio']}")
+    st.write(f"**52W High:** ₹{stock['High52W']}")
+    st.write(f"**52W Low:** ₹{stock['Low52W']}")
+    st.write(f"**Sector:** {stock['Sector']}")
+
+
+    if "buy_clicked" not in st.session_state:
+        st.session_state.buy_clicked = False
+    if "confirm_clicked" not in st.session_state:
+        st.session_state.confirm_clicked = False
+
+    if st.button("🛒 Buy Stock"):
+        st.session_state.buy_clicked = True
+        st.session_state.confirm_clicked = False  # Reset confirmation
+
+    if st.session_state.buy_clicked:
+        quantity = st.number_input("Enter quantity", min_value=1, step=1, key="buy_quantity")
+        if st.button("Confirm Purchase"):
+            st.session_state.confirm_clicked = True
+
+        if st.session_state.confirm_clicked:
+            total_cost = stock['Price'] * st.session_state.buy_quantity
+            st.success(f"✅ Purchased {st.session_state.buy_quantity} shares of {stock['Name']} for ₹{total_cost:.2f}")
+            st.write(f"Your total amount is {total_cost} and you have only 500rs")
+    
+    if st.button("🔙 Back to Explore"):
+        st.session_state.buy_clicked = False
+        st.session_state.confirm_clicked = False
+        st.query_params.clear()
+        st.rerun()
+

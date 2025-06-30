@@ -56,3 +56,5 @@ def register(active_tab="Login"):
     if st.button("← Back to Home"):
         st.session_state.show_auth = False
         st.rerun()
+
+

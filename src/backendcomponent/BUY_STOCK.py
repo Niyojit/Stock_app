@@ -3,6 +3,20 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 from src.fetchdata.sqlconnect import get_sql_connection
 
+def add_cash(user_id, amount):
+    conn = get_sql_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT initial_cash FROM users WHERE id = ?", (user_id,))
+    result = cursor.fetchone()
+
+    if not result:
+        return {"error": "User not found"}
+    
+    cursor.execute("UPDATE users SET initial_cash = initial_cash + ? WHERE id = ?", (amount, user_id))
+    conn.commit()
+    return {"success": f"₹{amount} added successfully"}
+
 def buy_stock(user_id, symbol, quantity, price):
     conn = get_sql_connection()
     cursor = conn.cursor()
@@ -31,3 +45,39 @@ def buy_stock(user_id, symbol, quantity, price):
 
     conn.commit()
     return {"success": "Stock bought"}
+
+
+# ✅ INTERACTIVE FLOW
+def run_buy_flow(user_id, symbol, quantity, price):
+    conn = get_sql_connection()
+    cursor = conn.cursor()
+    cost = quantity * price
+
+    cursor.execute("SELECT initial_cash FROM users WHERE id = ?", (user_id,))
+    result = cursor.fetchone()
+    
+    if not result:
+        print("❌ User not found.")
+        return
+
+    current_cash = result[0]
+
+    if current_cash < cost:
+        print(f"❌ Not enough cash: Have ₹{current_cash}, need ₹{cost}")
+        choice = input("Do you want to add funds? (yes/no): ").lower()
+        if choice == "yes":
+            amount = float(input("Enter amount to add: "))
+            add_result = add_cash(user_id, amount)
+            print(add_result)
+            return buy_stock(user_id, symbol, quantity, price)
+        else:
+            return {"error": "User cancelled"}
+    else:
+        return buy_stock(user_id, symbol, quantity, price)
+
+
+# ✅ Example call
+if __name__ == "__main__":
+    user_id = 1  # 🔁 Replace with actual user ID
+    result = run_buy_flow(user_id, "TCS", 10, 2000)
+    print(result)

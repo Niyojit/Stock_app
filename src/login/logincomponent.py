@@ -20,6 +20,7 @@ BEGIN
         [Mobile_no] NVARCHAR(15) UNIQUE,
         [DOB] DATE,
         [Gender] VARCHAR(10)
+        [Initial_cash] float default 100000.00
     )
 END
 """)

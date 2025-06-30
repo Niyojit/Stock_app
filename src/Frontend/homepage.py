@@ -2,10 +2,12 @@ import streamlit as st
 import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
 from backendcomponent.explore import explorepage
+from backendcomponent.singlestock import show_stock_details
+
 st.set_page_config(page_title="Explore | StockSphere", layout="wide")
 
+selected_stock = st.query_params.get("stock", None)
 # Inject CSS to remove padding/margin
 st.markdown("""
     <style>
@@ -40,6 +42,10 @@ with col3:
 tab1, tab2, tab3, tab4, tab5 = st.tabs(["Explore", "Holdings", "List", "Tools", "Wallet"])
 
 with tab1:
-    explorepage()
+    if selected_stock:
+        show_stock_details(selected_stock)
+    else:
+        explorepage()
+        
 
 
