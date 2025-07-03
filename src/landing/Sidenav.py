@@ -2,34 +2,60 @@ import streamlit as st
 from streamlit_option_menu import option_menu
 import sys
 import os
+import time
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from backendcomponent.explore import explorepage
-from backendcomponent.singlestock import show_stock_details  # ⬅️ Make sure this exists
+
 from backendcomponent.wallet import my_money
+from backendcomponent.moneytransaction import money_transaction
+from backendcomponent.holding import holding_page
+from backendcomponent.sip_calculator import sip_calculator_page
+from backendcomponent.analytics import show_analytics_page
+
 def sidebar_items():
     with st.sidebar:
         selected = option_menu(
-            menu_title="My Profile",
-            options=["Explore", "Holdings", "SIP Calculator", "Stock Transactions", "Analytics", "My wallet"],
-            icons=["house", "book", "calculator", "graph-up", "telephone", "people"],
+            menu_title="Your Profile",
+            options=["Explore", "Holdings", "SIP Calculator", "Money Transactions", "Analytics", "My wallet", "Logout"],
+            icons=["house", "book", "calculator", "graph-up", "telephone", "people", "box-arrow-right"],
             menu_icon="cast",
             default_index=0,
         )
+        
+
         return selected
 
-def sidebar_navigator(selected_option):
-    # 👇 Check if user is on Explore tab AND a stock is selected
-    query_params = st.query_params
-    if selected_option == "Explore" and "symbol" in query_params:
-        return show_stock_details()
-    elif selected_option == "Explore":
-        return explorepage()
+def sidebar_navigator(selected_option, username, user_id):
+ 
+ 
+    
+    if selected_option == "Explore":
+        return explorepage(username, user_id)
     elif selected_option == "My wallet":
-        return my_money()
+        return my_money(username, user_id)
+    elif selected_option == "Logout":
+        st.session_state.clear()
+        st.rerun() 
+    elif selected_option == "Money Transactions":
+        return money_transaction(username, user_id)
+    elif selected_option == "Holdings":
+        return holding_page(username, user_id)
+    elif selected_option == "SIP Calculator":
+        return sip_calculator_page()
+    elif selected_option == "Analytics":
+        return show_analytics_page(user_id)
 
-if __name__ == '__main__':
+
+def launch_dashboard(username, user_id):
     st.set_page_config(page_title="Dashboard", layout="wide")
+    username = username or st.session_state.get("username", "")
+    user_id = user_id or st.session_state.get("user_id", None)
     selected_option = sidebar_items()
-    sidebar_navigator(selected_option)
+
+    st.markdown(f"### Hello! {username}, welcome to your dashboard! 👋")
+    sidebar_navigator(selected_option, username, user_id)
+
+
+

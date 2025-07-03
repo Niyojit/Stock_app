@@ -3,6 +3,9 @@
 import yfinance as yf
 import pandas as pd
 from fetchdata.sqlconnect import get_sql_connection
+# from sqlconnect import get_sql_connection
+import time
+from datetime import datetime, timedelta
 
 import os
 import sys
@@ -61,3 +64,10 @@ def fetch_and_store_stocks():
             row["PERatio"], row["High52W"], row["Low52W"], row["Volume"], row["Sector"])
     conn.commit()
     conn.close()
+
+if __name__ == "__main__":
+ while True:
+        print(f"Fetching data at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        fetch_and_store_stocks()
+        print("Waiting for 60 seconds...\n")
+        time.sleep(60)

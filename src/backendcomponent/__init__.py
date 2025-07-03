@@ -4,5 +4,9 @@ from backendcomponent.explore import explorepage
 # from backendcomponent.stock_transaction import show_stock_transaction
 # from backendcomponent.contact_us import show_contact_us
 # from backendcomponent.community import  show_community
-
-
+from backendcomponent.moneytransaction import money_transaction
+from backendcomponent.holding import get_user_holdings
+from backendcomponent.sip_calculator import sip_calculator_page
+from backendcomponent.analytics import show_analytics_page
+from backendcomponent.buystock import show_selected_stock_details
+from backendcomponent.sellstock import show_sell_stock_details 

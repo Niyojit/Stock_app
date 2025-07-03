@@ -19,7 +19,7 @@ BEGIN
         [email] NVARCHAR(100) UNIQUE,
         [Mobile_no] NVARCHAR(15) UNIQUE,
         [DOB] DATE,
-        [Gender] VARCHAR(10)
+        [Gender] VARCHAR(10),
         [Initial_cash] float default 100000.00
     )
 END
@@ -28,22 +28,36 @@ conn.commit()
 
 # ✅ Register function
 def register_user(username, password, email, mobile_no, dob, gender):
+    conn = get_sql_connection()
+    cursor = conn.cursor()
     hashed = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
     dob_str = dob.strftime('%Y-%m-%d') 
     try:
-        cursor.execute("INSERT INTO users (username, password_hash, email, Mobile_no, DOB, Gender) VALUES (?, ?, ?, ?, ?, ?)", (username, hashed, email, mobile_no, dob_str, gender))
+        cursor.execute("INSERT INTO users (username, password_hash, email, Mobile_no, DOB, Gender, Initial_cash) VALUES (?, ?, ?, ?, ?, ?, ?)", (username, hashed, email, mobile_no, dob_str, gender, 100000))
         conn.commit()
         return True
     except Exception as e:
         print("Registration failed:", e)
         return False
+    finally:
+        cursor.close()
+        conn.close()
 
 # ✅ Authenticate function
 def authenticate_user(username, password):
-    cursor.execute("SELECT password_hash FROM users WHERE username = ?", (username,))
-    result = cursor.fetchone()
-    if result:
-        stored_hash = result[0]
-        return bcrypt.checkpw(password.encode(), stored_hash.encode())
-    return False
+    conn = get_sql_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("SELECT id, username, password_hash FROM users WHERE username = ?", (username,))
+        result = cursor.fetchone()
+        if result:
+            user_id, username, stored_hash = result
+            if bcrypt.checkpw(password.encode(), stored_hash.encode()):
+                return { "username": username, "user_id": user_id}
+        return None
+    finally:
+        cursor.close()
+        conn.close()
 
+
+    
