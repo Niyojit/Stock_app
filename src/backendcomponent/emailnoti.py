@@ -7,36 +7,36 @@ from datetime import datetime
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from fetchdata.sqlconnect import get_sql_connection
 
-# Connect to database
+
 conn = get_sql_connection()
 
-# Fetch user details
+
 users_df = pd.read_sql("SELECT id, username, email FROM users", conn)
 
-# Get latest prices
+
 latest_prices = pd.read_sql("""
     SELECT Symbol, Price AS current_price
     FROM dbo.IndianStockLiveData
     WHERE FetchTime = (SELECT MAX(FetchTime) FROM dbo.IndianStockLiveData)
 """, conn)
 
-# Email credentials
+
 sender_email = "abhaydhuriya860@gmail.com"
 app_password = "ukcwarbtivmagael"
 yag = yagmail.SMTP(user=sender_email, password=app_password)
 
-# Loop through users
+
 for _, user in users_df.iterrows():
     user_id = user["id"]
     username = user["username"]
     email = user["email"]
 
-    # ✅ Skip if email is missing or invalid
+   
     if not isinstance(email, str) or "@" not in email:
         print(f"⛔ Skipped: Invalid or missing email for {username}")
         continue
 
-    # Holdings
+ 
     buy_df = pd.read_sql("""
         SELECT symbol, SUM(quantity) AS bought_qty, AVG(price) AS avg_price
         FROM dbo.StockBuyTransactions

@@ -93,7 +93,7 @@ def my_money(username, user_id):
                             "UPDATE users SET Initial_cash = ? WHERE id = ?",
                             (new_balance, user_id)
                         )
-                        st.write(f"I am {username}")
+                     
                         log_transaction(user_id, username, withdraw_amt, "Withdrawn")
                        
                         conn.commit()
@@ -115,7 +115,7 @@ def log_transaction(user_id, username, amount, status):
 
     transaction_id = str(uuid.uuid4())[:8]  
 
-    # ✅ Insert using Amount column (updated)
+  
     cursor.execute("""
         INSERT INTO MoneyTransactionHistory (Money_Transaction_id, user_id, username, Amount, Status)
         VALUES (?, ?, ?, ?, ?)

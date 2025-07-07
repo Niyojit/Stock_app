@@ -14,7 +14,7 @@ from backendcomponent.sellstock import show_sell_stock_details
 
 def show_selected_stock_details(symbol, username, user_id):
     if st.session_state.get("selected_symbol"):
-        st_autorefresh(interval=3000, key="refresh_explore")
+        st_autorefresh(interval=60000, key="refresh_explore")
     
     st.write("🔍 Currently Viewing:", symbol)
 
@@ -33,10 +33,10 @@ def show_selected_stock_details(symbol, username, user_id):
     stock = df.iloc[0]
     st.markdown("---")
    
-    # 🟨 Split layout into two columns
+  
     col1, col2 = st.columns([2, 3])
 
-    # --- LEFT SIDE: Stock Info, Buy/Sell ---
+   
     with col1:
         st.subheader(f"📊 {stock['Name']} ({stock['Symbol']})")
 
@@ -113,8 +113,8 @@ def show_selected_stock_details(symbol, username, user_id):
  
     with col2:
         st.subheader("📈 Price & Volume Trend")
-        st_autorefresh(interval=3000, key="refresh_graph")
-        # Fetch historical data
+        st_autorefresh(interval=60000, key="refresh_graph")
+        
         conn = get_sql_connection()
         hist_df = pd.read_sql(
             "SELECT [DateTime], [Open], [Close], [High], [Low], [Volume] FROM dbo.HistoryStockData WHERE Symbol = ? ORDER BY [DateTime]",
@@ -129,7 +129,6 @@ def show_selected_stock_details(symbol, username, user_id):
             hist_df["DateTime"] = pd.to_datetime(hist_df["DateTime"])
             hist_df.set_index("DateTime", inplace=True)
 
-            # --- 📅 Resampling Option ---
             resample_option = st.radio("Resample By:", ["30min", "Hourly", "Daily"], horizontal=True)
 
             if resample_option == "Hourly":
@@ -149,9 +148,8 @@ def show_selected_stock_details(symbol, username, user_id):
                     "Volume": "sum"
                 }).dropna()
             else:
-                df_resampled = hist_df  # 30-min default
+                df_resampled = hist_df  
 
-            # --- 📊 Chart Option ---
             chart_type = st.selectbox("Chart Type", ["Close Price", "Open vs Close", "Volume"], index=0)
 
             fig = go.Figure()

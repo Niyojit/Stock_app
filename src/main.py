@@ -3,8 +3,6 @@ import streamlit as st
 from landing.Landingpage import landing_page
 from landing.Sidenav import launch_dashboard
 
-
-
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 if "user_id" not in st.session_state:

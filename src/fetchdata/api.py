@@ -11,7 +11,6 @@ import os
 import sys
 
 
-# Set up backend path if needed
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 top_20_symbols = [
     "RELIANCE.NS", "TCS.NS", "INFY.NS", "HDFCBANK.NS", "ICICIBANK.NS",
@@ -24,7 +23,6 @@ def fetch_and_store_stocks():
     conn = get_sql_connection()
     cursor = conn.cursor()
 
-    # Create table if not exists
     cursor.execute("""
     IF OBJECT_ID('dbo.IndianStockLiveData', 'U') IS NULL
     CREATE TABLE dbo.IndianStockLiveData (

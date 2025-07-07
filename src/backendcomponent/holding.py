@@ -4,16 +4,16 @@ import os
 import sys
 from streamlit_autorefresh import st_autorefresh
 
-# ✅ Path setup for imports
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from fetchdata.sqlconnect import get_sql_connection
 
 
-# 🔥 Fetch user holdings with live price integration
+
 def get_user_holdings(user_id):
     conn = get_sql_connection()
 
-    # 🛒 Total Buy Summary
+ 
     buy_df = pd.read_sql("""
         SELECT symbol, SUM(quantity) AS bought_qty, AVG(price) AS avg_price, SUM(total) AS total_buy
         FROM dbo.StockBuyTransactions
@@ -25,7 +25,7 @@ def get_user_holdings(user_id):
         conn.close()
         return pd.DataFrame()
 
-    # 🏷️ Total Sell Summary
+
     sell_df = pd.read_sql("""
         SELECT symbol, SUM(quantity) AS sold_qty
         FROM dbo.StockSellTransactions
@@ -33,18 +33,18 @@ def get_user_holdings(user_id):
         GROUP BY symbol
     """, conn, params=[user_id])
 
-    # 🔗 Merge Buy & Sell
+
     df = pd.merge(buy_df, sell_df, on="symbol", how="left")
     df["sold_qty"] = df["sold_qty"].fillna(0)
     df["net_qty"] = df["bought_qty"] - df["sold_qty"]
 
-    # ➕ Filter stocks still held
+    
     df = df[df["net_qty"] > 0]
 
-    # 🔄 Standardize symbols (Ensure ".NS" suffix for matching live data)
+    
     df["symbol"] = df["symbol"].apply(lambda x: x if x.endswith('.NS') else x + '.NS')
 
-    # 🔥 Fetch Latest Stock Prices for each symbol
+  
     live_prices = pd.read_sql("""
         SELECT l.Symbol, l.Price AS current_price
         FROM dbo.IndianStockLiveData l
@@ -57,10 +57,10 @@ def get_user_holdings(user_id):
 
     conn.close()
 
-    # 🔗 Merge live prices
+ 
     df = df.merge(live_prices, left_on="symbol", right_on="Symbol", how="left")
 
-    # 💰 Calculations
+ 
     df["current_value"] = df["net_qty"] * df["current_price"]
     df["investment"] = df["net_qty"] * df["avg_price"]
     df["gain_loss"] = df["current_value"] - df["investment"]
@@ -68,10 +68,10 @@ def get_user_holdings(user_id):
     return df
 
 
-# 🎯 Streamlit Page to Display Holdings
+
 def holding_page(username, user_id):
     st.title("📦 My Holdings")
-    st_autorefresh(interval=3000, key="refresh_explore", limit=None)
+    st_autorefresh(interval=60000, key="refresh_explore", limit=None)
     if not st.session_state.get("logged_in"):
         st.error("⚠️ You must be logged in to view holdings.")
         return
@@ -98,7 +98,7 @@ def holding_page(username, user_id):
         "gain_loss": "Gain/Loss (₹)"
     }, inplace=True)
 
-    # ✅ Apply currency formatting
+    
     for col in ["Avg Buy Price (₹)", "Current Price (₹)", "Investment (₹)", "Current Value (₹)", "Gain/Loss (₹)"]:
         df_display[col] = df_display[col].apply(lambda x: f"₹{x:,.2f}")
 

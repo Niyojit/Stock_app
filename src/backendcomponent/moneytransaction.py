@@ -5,18 +5,11 @@ import os
 import pandas as pd
 from datetime import datetime
 
-
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
 from src.fetchdata.sqlconnect import get_sql_connection
 
-
-
 def money_transaction(username, user_id):
     st.set_page_config(page_title="Money Transaction", layout="wide", initial_sidebar_state="expanded")
-    
-
-    
-
    
     username = username or st.session_state.get("username", "")
     user_id = user_id or st.session_state.get("user_id", None)
@@ -24,7 +17,6 @@ def money_transaction(username, user_id):
     if not username or user_id is None:
         st.error("⚠️ Session expired. Please log in again.")
         return
-
 
     if st.session_state.get("wallet_updated", False):
         st.session_state["wallet_updated"] = False
@@ -63,12 +55,12 @@ def money_transaction(username, user_id):
     st.markdown(f"### 💰 Transaction History")
 
     for trx in valid_records:
-        # ✅ Force unpack inner tuple if needed
+       
         if len(trx) == 1 and isinstance(trx[0], tuple):
             trx = trx[0]
 
         if len(trx) != 5:
-            continue  # Skip malformed rows
+            continue  
 
         trx_id, username, amount, time, status = trx
 

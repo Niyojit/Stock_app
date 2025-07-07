@@ -18,11 +18,11 @@ def is_valid_password(password):
 def register(active_tab="Login"):
     st.set_page_config(page_title="Login | StockSphere", layout="centered")
     st.title("🔐 Welcome to StockSphere")
-    # Preserve any previous query params like ?symbol=XYZ
+    
     query_params = st.query_params
     if "symbol" in query_params:
         st.experimental_set_query_params(symbol=query_params["symbol"])
-    # Use radio buttons to simulate tab switching
+   
     selected_tab = active_tab if "selected_tab" not in st.session_state else st.session_state.selected_tab
     selected_tab = st.radio("Choose an option:", ["Login", "Register"], index=0 if selected_tab == "Login" else 1)
     st.session_state.selected_tab = selected_tab
@@ -63,7 +63,7 @@ def register(active_tab="Login"):
         gender = st.selectbox("⚧️ Gender", ("Male", "Female", "Other"), key="gender")
 
         if st.button("Register"):
-            # === 🚨 Validation Section ===
+            
             if not (username and password and confirm_password and email and mobile_no):
                 st.warning("⚠️ Please fill all required fields.")
             elif password != confirm_password:
@@ -75,7 +75,7 @@ def register(active_tab="Login"):
             elif not is_valid_password(password):
                 st.error("🔐 Password must be at least 6 characters and contain at least one special character.")
             else:
-                # All validations passed
+                
                 success = register_user(username, password, email, mobile_no, dob, gender)
                 if success:
                     st.success("🎉 Registration successful! You can now log in.")

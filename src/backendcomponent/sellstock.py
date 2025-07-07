@@ -6,7 +6,6 @@ from urllib.parse import urlencode
 import uuid
 from streamlit_autorefresh import st_autorefresh
 
-# Add parent directory to path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from fetchdata.sqlconnect import get_sql_connection
 from fetchdata.api import fetch_and_store_stocks
@@ -14,7 +13,6 @@ from fetchdata.api import fetch_and_store_stocks
 def show_sell_stock_details(symbol, username, user_id):
     conn = get_sql_connection()
 
-    # Fetch stock live data
     stock_df = pd.read_sql("SELECT * FROM dbo.IndianStockLiveData WHERE Symbol = ?", conn, params=[symbol])
     if stock_df.empty:
         st.warning("Stock data not found.")
@@ -22,7 +20,7 @@ def show_sell_stock_details(symbol, username, user_id):
         return
     stock = stock_df.iloc[0]
 
-    # Calculate net quantity = Buy - Sell
+
     buy_df = pd.read_sql("""
         SELECT SUM(quantity) AS total_bought
         FROM dbo.StockBuyTransactions
@@ -53,7 +51,7 @@ def show_sell_stock_details(symbol, username, user_id):
     if st.button("Confirm Sale"):
         cur = conn.cursor()
 
-        # Create table if not exists
+        
         cur.execute("""
             IF OBJECT_ID('dbo.StockSellTransactions', 'U') IS NULL
                 CREATE TABLE dbo.StockSellTransactions (
@@ -67,13 +65,13 @@ def show_sell_stock_details(symbol, username, user_id):
                     time DATETIME DEFAULT GETDATE()
                 )
             """)
-        # Insert sell transaction
+      
         cur.execute("""
             INSERT INTO dbo.StockSellTransactions (user_id, username, symbol, quantity, price, total)
             VALUES (?, ?, ?, ?, ?, ?)
         """, (user_id, username, symbol, sell_qty, stock["Price"], sell_total))
 
-        # Update user's cash
+      
         cur.execute("UPDATE users SET Initial_cash = Initial_cash + ? WHERE id = ?", (sell_total, user_id))
 
         conn.commit()

@@ -7,12 +7,11 @@ from login.loginUI import register
 
 def landing_page():
 
-    # Initialize session state for auth navigation
     if "show_auth" not in st.session_state:
         st.session_state.show_auth = False
         st.session_state.auth_tab = "Login"
 
-    # Redirect to login/register interface if requested
+ 
     if st.session_state.show_auth:
         register(active_tab=st.session_state.auth_tab)
         st.stop()
@@ -44,11 +43,11 @@ def landing_page():
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     """, unsafe_allow_html=True)
 
-    # --- Navigation Bar ---
+ 
     with st.container():
         col1, col2, col3, col4 = st.columns([0.5, 2, 3, 1.2])
 
-        # Logo and title
+    
         with col1:
             st.markdown(
                 '<i class="fa-solid fa-money-bill-trend-up fa-xl" style="color:#ff4081;"></i>',
@@ -58,7 +57,7 @@ def landing_page():
         with col2:
             st.markdown("### StockSphere")
 
-        # Navigation items (styled like buttons but non-clickable)
+  
         with col3:
             nav_cols = st.columns(4)
             nav_labels = ["Home", "About", "Services", "Contact"]
@@ -66,7 +65,7 @@ def landing_page():
                 with nav_cols[i]:
                     st.markdown(f"<div style='padding: 8px 0px; font-weight: 500; text-align: center; color: #1a1a1a;'>{label}</div>", unsafe_allow_html=True)
 
-        # Sign Up Button
+      
         with col4:
             if st.button("Login", use_container_width=True):
                 st.session_state.show_auth = True

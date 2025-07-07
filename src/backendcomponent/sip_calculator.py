@@ -1,7 +1,7 @@
 import streamlit as st
 import matplotlib.pyplot as plt
 
-# --- SIP Calculation Function ---
+
 def calculate_sip(monthly_investment, annual_rate, investment_duration_years):
     r = annual_rate / 100 / 12  # Monthly interest rate
     n = investment_duration_years * 12  # Total number of months
@@ -15,7 +15,7 @@ def calculate_sip(monthly_investment, annual_rate, investment_duration_years):
     estimated_returns = future_value - invested_amount
     return invested_amount, estimated_returns, future_value
 
-# --- SIP Calculator Page ---
+
 def sip_calculator_page():
     st.title("📈 SIP Calculator")
 

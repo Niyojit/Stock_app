@@ -1,12 +1,12 @@
 import yfinance as yf
 import pandas as pd
 from sqlconnect import get_sql_connection
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
 import sys
 import time
-from streamlit_autorefresh import st_autorefresh
-# Add parent directory to sys.path
+import pytz
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 top_20_symbols = [
@@ -19,8 +19,7 @@ top_20_symbols = [
 def fetch_and_store_halfhourly_data():
     conn = get_sql_connection()
     cursor = conn.cursor()
-    st_autorefresh(interval=3000, key="refresh_explore")
-    # Create the table if not exists
+
     cursor.execute("""
     IF OBJECT_ID('dbo.HistoryStockData', 'U') IS NULL
     CREATE TABLE dbo.HistoryStockData(
@@ -36,36 +35,51 @@ def fetch_and_store_halfhourly_data():
     """)
     conn.commit()
 
+    tz = pytz.timezone("Asia/Kolkata")
+
+# Convert to timezone-aware datetime
+    now = datetime.now(tz)
+    one_hour_ago = now - timedelta(hours=1)
+   
     for symbol in top_20_symbols:
-        print(f"Fetching 30-min interval data for past 10 days: {symbol}")
+        print(f"Fetching data for last 1 hour at 30-minute intervals: {symbol}")
         stock = yf.Ticker(symbol)
-        df = stock.history(period="10d", interval="30m")
-        
+        df = stock.history(period="1d", interval="30m")
+
         if df.empty:
             print(f"No data returned for {symbol}")
             continue
 
-        df = df.reset_index()  # Ensure DateTime is a column
+        df = df.reset_index()
+       
+        df["Datetime"] = pd.to_datetime(df["Datetime"])
 
-        for _, row in df.iterrows():
-           
-                        cursor.execute("""
-            INSERT INTO dbo.HistoryStockData
-            (Symbol, Price, DateTime, [Open], High, Low, [Close], Volume)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        """, symbol, row["Close"] , row["Datetime"], row["Open"], row["High"],
-            row["Low"], row["Close"], row["Volume"])
+        df_last_hour = df[df["Datetime"] >= one_hour_ago].tail(2)
+
+        for _, row in df_last_hour.iterrows():
+            
+            cursor.execute("""
+                SELECT COUNT(*) FROM dbo.HistoryStockData
+                WHERE Symbol = ? AND DateTime = ?
+            """, symbol, row["Datetime"])
+            exists = cursor.fetchone()[0]
+
+            if exists == 0:
+                cursor.execute("""
+                    INSERT INTO dbo.HistoryStockData
+                    (Symbol, Price, DateTime, [Open], High, Low, [Close], Volume)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                """, symbol, row["Close"], row["Datetime"], row["Open"], row["High"],
+                     row["Low"], row["Close"], row["Volume"])
+            else:
+                print(f"Skipping duplicate for {symbol} at {row['Datetime']}")
 
     conn.commit()
     conn.close()
 
 if __name__ == "__main__":
-     while True:
-        print(f"Fetching data at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    while True:
+        print(f"\n⏰ Fetching data at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         fetch_and_store_halfhourly_data()
-        print("Waiting for 60 seconds...\n")
-        time.sleep(60)
-
-
-
-
+        print("✅ Done. Waiting for 30 minutes...\n")
+        time.sleep(1800)

@@ -15,7 +15,7 @@ from fetchdata.sqlconnect import get_sql_connection
 # ✅ Fetch user holdings
 def get_user_holdings(user_id):
     conn = get_sql_connection()
-    st_autorefresh(interval=3000, key="refresh_analytics")
+    st_autorefresh(interval=60000, key="refresh_analytics")
     buy_df = pd.read_sql("""
         SELECT symbol, SUM(quantity) AS bought_qty, AVG(price) AS avg_price, SUM(total) AS total_buy
         FROM dbo.StockBuyTransactions
